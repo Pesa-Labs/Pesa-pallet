@@ -12,7 +12,7 @@
 //! ### Dispatchable Functions
 //!
 //! * `register` - Register phone number with an account.
-//! * 
+//! * `resolve` - Perform phone number to address resolution.
 //!
 //! [`Call`]: ./enum.Call.html
 //! [`Trait`]: ./trait.Trait.html
@@ -64,6 +64,9 @@ decl_event!(
 	pub enum Event<T> where AccountId = <T as frame_system::Trait>::AccountId, Balance = BalanceOf<T> {
 		/// Phone number was registered with an address. \[who, fee\]
 		Register(PhoneNumber, Balance),
+		
+		/// Phone number to address was resolved. \[who\]
+		Resolve(PhoneNumber)
 	}
 );
 
@@ -129,6 +132,13 @@ decl_module! {
 
 			<NumberOf<T>>::insert(&sender, (phone_number, deposit));
 		}
+
+		fn resolve_phone_number_to_address(origin) {
+            ensure!(phone_number.len() >= T::MinLength::get(), Error::<T>::TooShort);
+            ensure!(phone_number.len() <= T::MaxLength::get(), Error::<T>::TooLong);
+
+            <NumberOf<T>>::get(&sender);
+        }
 	}
 }
 
