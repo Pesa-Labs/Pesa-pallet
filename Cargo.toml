@@ -1,9 +1,9 @@
 [package]
-name = "pesa_pallet"
+name = "pallet-pesa"
 version = "0.1.0"
 authors = ["Jinesh Doshi <jdoshi1@asu.edu>"]
 edition = "2018"
-repository = "https://github.com/Pesa-Labs/pesa_pallet.git"
+repository = "https://github.com/Pesa-Labs/pallet-pesa.git"
 description = "FRAME pallet for PESA pay"
 readme = "README.md"
 
