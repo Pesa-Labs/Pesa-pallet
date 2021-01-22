@@ -45,6 +45,9 @@ pub trait Trait: frame_system::Trait {
 	/// What to do with slashed funds.
 	type Slashed: OnUnbalanced<NegativeImbalanceOf<Self>>;
 
+	/// The origin which may forcibly set or remove a number. Root can always do this.
+	type ForceOrigin: EnsureOrigin<Self::Origin>;
+
 	/// The minimum length a phone number can be.
 	type MinLength: Get<usize>;
 
@@ -55,18 +58,16 @@ pub trait Trait: frame_system::Trait {
 decl_storage! {
 	trait Store for Module<T: Trait> as Pesa {
 		/// The lookup table for wallet address.
-		// NumberOf: map hasher(twox_64_concat) T::AccountId => Option<Vec<u8>>;
-		NumberOf: map hasher(twox_64_concat) T::AccountId => Option<Vec<u8>>;
+		NumberOf: map hasher(twox_64_concat) T::AccountId => Option<(Vec<u8>, BalanceOf<T>)>;
 	}
 }
 
 decl_event!(
 	pub enum Event<T> where AccountId = <T as frame_system::Trait>::AccountId, Balance = BalanceOf<T> {
 		/// Phone number was registered with an address. \[who, fee\]
-		Register(PhoneNumber, Balance),
-		
-		/// Phone number to address was resolved. \[who\]
-		Resolve(PhoneNumber)
+		NumberSet(AccountId),
+		NumberChanged(AccountId),
+		NumberCleared(AccountId, Balance),
 	}
 );
 
@@ -121,24 +122,17 @@ decl_module! {
 			ensure!(phone_number.len() <= T::MaxLength::get(), Error::<T>::TooLong);
 
 			let deposit = if let Some((_, deposit)) = <NumberOf<T>>::get(&sender) {
-				Self::deposit_event(RawEvent::Register(sender.clone()));
+				Self::deposit_event(RawEvent::NumberChanged(sender.clone()));
 				deposit
 			} else {
 				let deposit = T::ReservationFee::get();
 				T::Currency::reserve(&sender, deposit.clone())?;
-				Self::deposit_event(RawEvent::NameSet(sender.clone()));
+				Self::deposit_event(RawEvent::NumberSet(sender.clone()));
 				deposit
 			};
 
 			<NumberOf<T>>::insert(&sender, (phone_number, deposit));
 		}
-
-		fn resolve_phone_number_to_address(origin) {
-            ensure!(phone_number.len() >= T::MinLength::get(), Error::<T>::TooShort);
-            ensure!(phone_number.len() <= T::MaxLength::get(), Error::<T>::TooLong);
-
-            <NumberOf<T>>::get(&sender);
-        }
 	}
 }
 
