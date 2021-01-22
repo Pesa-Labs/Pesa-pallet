@@ -59,15 +59,16 @@ decl_storage! {
 	trait Store for Module<T: Trait> as Pesa {
 		/// The lookup table for wallet address.
 		NumberOf: map hasher(twox_64_concat) T::AccountId => Option<(Vec<u8>, BalanceOf<T>)>;
+		//AccountOf: map hasher(twox_64_concat) T::PhoneNumber => Option(AccountId, BalanceOf<T>)>;
 	}
 }
 
 decl_event!(
-	pub enum Event<T> where AccountId = <T as frame_system::Trait>::AccountId, Balance = BalanceOf<T> {
+	pub enum Event<T> where AccountId = <T as frame_system::Trait>::AccountId, Balance = BalanceOf<T>, PhoneNumber = Vec<u8> {
 		/// Phone number was registered with an address. \[who, fee\]
-		NumberSet(AccountId),
-		NumberChanged(AccountId),
-		NumberCleared(AccountId, Balance),
+		NumberSet(AccountId, PhoneNumber),
+		NumberChanged(AccountId, PhoneNumber),
+		NumberCleared(AccountId, Balance, PhoneNumber),
 	}
 );
 
@@ -120,14 +121,15 @@ decl_module! {
 
 			ensure!(phone_number.len() >= T::MinLength::get(), Error::<T>::TooShort);
 			ensure!(phone_number.len() <= T::MaxLength::get(), Error::<T>::TooLong);
+			let number = phone_number.clone();
 
 			let deposit = if let Some((_, deposit)) = <NumberOf<T>>::get(&sender) {
-				Self::deposit_event(RawEvent::NumberChanged(sender.clone()));
+				Self::deposit_event(RawEvent::NumberChanged(sender.clone(), number));
 				deposit
 			} else {
 				let deposit = T::ReservationFee::get();
 				T::Currency::reserve(&sender, deposit.clone())?;
-				Self::deposit_event(RawEvent::NumberSet(sender.clone()));
+				Self::deposit_event(RawEvent::NumberSet(sender.clone(), number));
 				deposit
 			};
 
@@ -171,6 +173,7 @@ mod tests {
 		type Call = ();
 		type Hashing = BlakeTwo256;
 		type AccountId = u64;
+		//type PhoneNumber = u64;
 		type Lookup = IdentityLookup<Self::AccountId>;
 		type Header = Header;
 		type Event = ();
