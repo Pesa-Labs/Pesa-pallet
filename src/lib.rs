@@ -64,11 +64,11 @@ decl_storage! {
 }
 
 decl_event!(
-	pub enum Event<T> where AccountId = <T as frame_system::Trait>::AccountId, Balance = BalanceOf<T>, PhoneNumber = Vec<u8> {
+	pub enum Event<T> where AccountId = <T as frame_system::Trait>::AccountId, Balance = BalanceOf<T> {
 		/// Phone number was registered with an address. \[who, fee\]
-		NumberSet(AccountId, PhoneNumber),
-		NumberChanged(AccountId, PhoneNumber),
-		NumberCleared(AccountId, Balance, PhoneNumber),
+		NumberSet(AccountId),
+		NumberChanged(AccountId),
+		NumberCleared(AccountId, Balance),
 	}
 );
 
@@ -121,15 +121,14 @@ decl_module! {
 
 			ensure!(phone_number.len() >= T::MinLength::get(), Error::<T>::TooShort);
 			ensure!(phone_number.len() <= T::MaxLength::get(), Error::<T>::TooLong);
-			let number = phone_number.clone();
 
 			let deposit = if let Some((_, deposit)) = <NumberOf<T>>::get(&sender) {
-				Self::deposit_event(RawEvent::NumberChanged(sender.clone(), number));
+				Self::deposit_event(RawEvent::NumberChanged(sender.clone()));
 				deposit
 			} else {
 				let deposit = T::ReservationFee::get();
 				T::Currency::reserve(&sender, deposit.clone())?;
-				Self::deposit_event(RawEvent::NumberSet(sender.clone(), number));
+				Self::deposit_event(RawEvent::NumberSet(sender.clone()));
 				deposit
 			};
 
