@@ -173,7 +173,7 @@ mod tests {
 		type Call = ();
 		type Hashing = BlakeTwo256;
 		type AccountId = u64;
-		//type PhoneNumber = u64;
+		type PhoneNumber = u64;
 		type Lookup = IdentityLookup<Self::AccountId>;
 		type Header = Header;
 		type Event = ();
