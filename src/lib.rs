@@ -59,7 +59,7 @@ decl_storage! {
     trait Store for Module<T: Trait> as Pesa {
         /// The lookup table for wallet address.
         NumberOf: map hasher(twox_64_concat) T::AccountId => Option<(Vec<u8>, BalanceOf<T>)>;
-        // AccountOf: map hasher(twox_64_concat) Vec<u8> => Option<(<T as frame_system::Trait>::AccountId, BalanceOf<T>)>;
+        AccountOf: map hasher(twox_64_concat) Vec<u8> => Option<(<T as frame_system::Trait>::AccountId, BalanceOf<T>)>;
     }
 }
 
@@ -140,7 +140,7 @@ decl_module! {
             };
 
             <NumberOf<T>>::insert(&sender, (phone_number.clone(), deposit));
-            // <AccountOf<Vec<u8>>>::insert(&phone_number, (&sender, deposit));
+            <AccountOf<T>>::insert(phone_number.clone(), (&sender, deposit));
         }
     }
 }
