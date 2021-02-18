@@ -21,7 +21,7 @@
 
 use frame_support::{
     decl_error, decl_event, decl_module, decl_storage, ensure,
-    traits::{Currency, EnsureOrigin, Get, OnUnbalanced, ReservableCurrency},
+    traits::{Currency, EnsureOrigin, Get, Imbalance, OnUnbalanced, ReservableCurrency},
 };
 use frame_system::ensure_signed;
 use sp_runtime::traits::{StaticLookup, Zero};
@@ -74,7 +74,7 @@ decl_event!(
         NumberSet(AccountId),
         NumberChanged(AccountId),
         NumberCleared(AccountId, Balance),
-        // PhoneNumberAddeded(AccountId, PhoneNumber),
+        // PhoneNumberAdded(AccountId, PhoneNumber),
         // PhoneNumberChanged(AccountId, PhoneNumber),
     }
 );
